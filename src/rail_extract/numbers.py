@@ -17,7 +17,7 @@ _WORDS = {
     )
 }
 _WORD = re.compile(r"\b(" + "|".join(_WORDS) + r")\b")
-_UNIT_ALIASES = {"m/s2": "m/s²", "m2": "m²", "mm2": "mm²", "km/hr": "km/h", "°c": "°c"}
+_UNIT_ALIASES = {"m/s2": "m/s²", "m2": "m²", "cm2": "cm²", "mm2": "mm²", "km/hr": "km/h"}
 
 
 def norm_text(text: str) -> str:
@@ -43,8 +43,8 @@ def fidelity_errors(extraction: Extraction, passage: str) -> list[str]:
     """Output values or units that the passage does not contain. Empty means faithful."""
     stated = numbers_in(passage)
     text = norm_text(passage).lower()
-    for alias, canonical in _UNIT_ALIASES.items():
-        text = text.replace(alias, canonical)
+    for alias, canonical in _UNIT_ALIASES.items():  # whole tokens only: "m2" is not in "cm2"
+        text = re.sub(rf"(?<![^\W\d_]){re.escape(alias)}(?![^\W\d_])", canonical, text)
     errors = []
     for r in extraction.requirements:
         for v in (r.value, r.value_max):

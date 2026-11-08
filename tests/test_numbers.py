@@ -58,3 +58,10 @@ def test_unit_must_be_a_whole_token_not_a_substring():
 def test_unit_alias_is_matched():
     out = Extraction(requirements=[_req(2, unit="m/s²")])
     assert fidelity_errors(out, "acceleration of 2 m/s2") == []
+
+
+def test_alias_does_not_corrupt_longer_units():
+    out = Extraction(requirements=[_req(2000, unit="cm2")])
+    assert fidelity_errors(out, "a free area of 2 000 cm2") == []
+    out = Extraction(requirements=[_req(2000, unit="m2")])
+    assert fidelity_errors(out, "a free area of 2 000 cm2") == ["unit m2"]
