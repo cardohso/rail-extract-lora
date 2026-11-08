@@ -65,3 +65,25 @@ def test_alias_does_not_corrupt_longer_units():
     assert fidelity_errors(out, "a free area of 2 000 cm2") == []
     out = Extraction(requirements=[_req(2000, unit="m2")])
     assert fidelity_errors(out, "a free area of 2 000 cm2") == ["unit m2"]
+
+
+def test_negative_numbers_and_range_dashes():
+    assert -25.0 in numbers_in("operating at – 25 °C and above")
+    assert -40.0 in numbers_in("from -40 °C")
+    assert 25.0 in numbers_in("– 25 °C")  # the positive reading is always allowed
+    assert -21.0 not in numbers_in("between 15 – 21 Hz")  # a range dash is not a sign
+    assert -10.0 not in numbers_in("5 % - 10 %")
+
+
+def test_table_rows_do_not_merge_numbers():
+    assert numbers_in("YTA | 70\n180 | 500") == {70.0, 180.0, 500.0}
+    assert 70180.0 not in numbers_in("YTA | 70\n180")
+    assert numbers_in("a gauge of 1 435 mm") == {1435.0}
+
+
+def test_multi_word_units_and_slash_spacing():
+    out = Extraction(requirements=[_req(2, unit="pulses per second")])
+    assert fidelity_errors(out, "at least 2 pulses per second") == []
+    out = Extraction(requirements=[_req(80, unit="km/h")])
+    assert fidelity_errors(out, "not more than 80 km / h") == []
+    assert norm_unit("Pulses  per  second") == "pulses per second"
