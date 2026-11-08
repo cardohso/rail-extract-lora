@@ -1,6 +1,6 @@
 # Labelling rules
 
-**Status: DRAFT until approved by the author.** Once approved, this file is frozen together with
+**Status: approved by the author on 2026-11-08.** This file is frozen together with
 the test set (`docs/PREREGISTRATION.md` section 3). Any later change goes in the report's
 deviations section. The schema is defined in `docs/PREREGISTRATION.md` section 2.
 
