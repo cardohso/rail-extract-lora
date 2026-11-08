@@ -44,6 +44,7 @@
     <h2>Label (JSON) <span id="source" class="muted draft"></span></h2>
     <textarea id="json" spellcheck="false" aria-label="Label as JSON"></textarea>
     <ul id="msgs" aria-live="polite"></ul>
+    <details id="other"><summary class="muted">Other drafter</summary><pre id="otherjson" class="draft"></pre></details>
     <div class="row">
       <button class="primary" id="save">Save and next</button>
       <button id="empty">No requirement</button>
@@ -91,6 +92,8 @@ async function load(id) {
   setJson(src ? src.requirements : []);
   $("unsure").checked = src ? src.unsure : false;
   if (j.draft && j.draft.note) msg(["draft note: " + j.draft.note], "warn");
+  $("other").hidden = !j.draft_b;
+  if (j.draft_b) $("otherjson").textContent = JSON.stringify({requirements: j.draft_b.requirements, unsure: j.draft_b.unsure, note: j.draft_b.note}, null, 1);
   await check();
 }
 function parse() {

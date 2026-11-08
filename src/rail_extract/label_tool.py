@@ -29,7 +29,8 @@ class State:
         self.split, self.root = split, root
         self.passages = {r["id"]: r for r in L.read_jsonl(root / "data/passages.jsonl")}
         self.manifest = L.read_jsonl(root / "data/splits/manifest.jsonl")
-        self.drafts = L.read_drafts(split, root)
+        self.drafts = L.read_drafts(split, "a", root)
+        self.drafts_b = L.read_drafts(split, "b", root)
 
     def labels(self) -> dict[str, L.Label]:
         return L.read_labels(self.split, self.root)
@@ -50,6 +51,7 @@ class State:
             "text": p["text"],
             "existing": existing.model_dump() if existing else None,
             "draft": draft,
+            "draft_b": self.drafts_b.get(pid),
             "progress": prog,
         }
 

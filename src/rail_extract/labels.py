@@ -34,6 +34,7 @@ class Label(BaseModel):
     skipped: bool = False
     skip_reason: str | None = None
     seconds: float = 0.0
+    source: str = "human"  # "human", or "auto-agreed" (two drafters agreed, no human saw it)
 
 
 def read_jsonl(path: Path) -> list[dict]:
@@ -60,8 +61,13 @@ def write_labels(split: str, labels: dict[str, Label], root: Path = ROOT) -> Non
     os.replace(tmp, path)
 
 
-def read_drafts(split: str, root: Path = ROOT) -> dict[str, dict]:
-    return {r["id"]: r for r in read_jsonl(root / "data/drafts" / f"{split}.jsonl")}
+def read_drafts(split: str, drafter: str = "a", root: Path = ROOT) -> dict[str, dict]:
+    """Drafts of one drafter, merged over all files named <split>.<drafter>*.jsonl."""
+    out: dict[str, dict] = {}
+    for path in sorted((root / "data/drafts").glob(f"{split}.{drafter}*.jsonl")):
+        for r in read_jsonl(path):
+            out[r["id"]] = r
+    return out
 
 
 def _order_key(pid: str) -> str:
