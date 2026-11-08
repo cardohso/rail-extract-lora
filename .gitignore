@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.env
+.env.*
+!.env.example
+# Weights and large artefacts are never committed.
+*.safetensors
+*.bin
+*.pt
+*.gguf
+adapters/
+checkpoints/
+outputs/
+# Raw downloads are rebuilt by script. Labelled data and predictions are committed on purpose.
+data/raw/
