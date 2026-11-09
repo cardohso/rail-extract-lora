@@ -15,3 +15,6 @@ checkpoints/
 outputs/
 # Raw downloads are rebuilt by script. Labelled data and predictions are committed on purpose.
 data/raw/
+
+# Cached API responses (free-tier requests are never repeated)
+.cache/

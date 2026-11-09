@@ -39,6 +39,24 @@ def json_schema() -> dict:
     return Extraction.model_json_schema()
 
 
+def flat_json_schema() -> dict:
+    """`json_schema()` with `$ref`s inlined and titles dropped, for decoders and APIs that do not
+    resolve references. Same constraints."""
+    schema = json_schema()
+    defs = schema.pop("$defs", {})
+
+    def walk(node):
+        if isinstance(node, dict):
+            if "$ref" in node:
+                return walk(defs[node["$ref"].rsplit("/", 1)[-1]])
+            return {k: walk(v) for k, v in node.items() if k != "title"}
+        if isinstance(node, list):
+            return [walk(v) for v in node]
+        return node
+
+    return walk(schema)
+
+
 def parse_output(text: str) -> Extraction | None:
     """Schema-valid output, or None. The caller counts None as an empty prediction."""
     try:
