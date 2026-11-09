@@ -25,3 +25,13 @@ the author's queue as an audit of how often agreement hides an error. See `src/r
 
 This replaces the plan that the author reviews every train and validation label
 (`docs/PREREGISTRATION.md` section 3). It is a deviation and is reported in `REPORT.md`.
+
+## No human review (decision of 2026-11-09)
+The author decided not to review labels: they do not have the domain knowledge to validate them.
+Consequences, all to be stated in `REPORT.md` as deviations and limitations:
+- No label in any split has been checked by a human. The pre-registered "hand-labelled or fully
+  checked by the author" test set (`docs/PREREGISTRATION.md` section 3) does not hold.
+- Results measure agreement with LLM-drafted labels, not with a verified ground truth.
+  Labelling hours are zero for human time; LLM drafting cost is reported instead.
+- The 10 % audit of auto-agreed labels is not done, so the error rate of agreement is unknown.
+- Passages where the two drafters disagree still need a decision rule (not yet fixed).
