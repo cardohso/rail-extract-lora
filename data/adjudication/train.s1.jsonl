@@ -1,0 +1,22 @@
+{"id": "tsi-ccs:Annex I §7.7.2.5#2", "choice": "b", "unsure": false, "reason": "Both empty; table exceeds 8 rows, identical labels"}
+{"id": "tsi-ccs:Annex I §7.7.2.8#1", "choice": "b", "unsure": false, "reason": "Minimum axle load is >=; frequency band not a limit; country condition"}
+{"id": "tsi-ene:Appendix D §Static pantograph gauge for 1 520 mm track gauge system#1", "choice": "a", "unsure": true, "reason": "Both empty; identical labels for large clearance table"}
+{"id": "tsi-loc-pas:Annex §4.2.2.2.3#1", "choice": "a", "unsure": true, "reason": "Same label; A parameter copied without article, shorter quote"}
+{"id": "tsi-loc-pas:Annex §4.2.3.3.2.2#1", "choice": "b", "unsure": true, "reason": "B includes YTA and YPZ values; A omits them"}
+{"id": "tsi-loc-pas:Annex §4.2.5.2#1", "choice": "b", "unsure": true, "reason": "B adds scope sentence to conditions as rules require"}
+{"id": "tsi-loc-pas:Annex §4.2.6.1.1#1", "choice": "b", "unsure": false, "reason": "B keeps negative lower bounds; A drops minus signs"}
+{"id": "tsi-loc-pas:Annex §4.2.6.1.2#2", "choice": "a", "unsure": false, "reason": "Identical labels; included angle limit correct"}
+{"id": "tsi-loc-pas:Annex §7.1.1.5.1#5", "choice": "b", "unsure": true, "reason": "tan γe ranges are network characteristics for verification, not design limits"}
+{"id": "tsi-loc-pas:Annex §7.1.1.6.1#5", "choice": "a", "unsure": false, "reason": "Identical empty labels; Tauern values are verification reference case"}
+{"id": "tsi-loc-pas:Annex §7.1.1.6.2#1", "choice": "b", "unsure": true, "reason": "Identical empty labels; T1 range arguably labelable"}
+{"id": "tsi-loc-pas:Annex §Specific case Ireland (‘P’) (2)#1", "choice": "b", "unsure": true, "reason": "'shall be 105 m' is ==; B adds country condition"}
+{"id": "tsi-loc-pas:Annex §Specific case Italy (‘P’)#1", "choice": "a", "unsure": true, "reason": "A keeps speed-band condition on all rows, shortest quotes"}
+{"id": "tsi-loc-pas:Annex §Specific case Spain (‘P’) (2)#1", "choice": "b", "unsure": true, "reason": "Alpha/beta are calculation-method factors, not design values"}
+{"id": "tsi-loc-pas:Annex §Specific conditions Finland#1", "choice": "a", "unsure": true, "reason": "Identical empty labels; 'half' of bogies not numeric"}
+{"id": "tsi-noi:Annex §6.2.3#2", "choice": "b", "unsure": true, "reason": "Table governs exemption from verification; procedural, A partial anyway"}
+{"id": "tsi-prm:Annex §4.2.1.2.2#1", "choice": "b", "unsure": true, "reason": "B adds two-level handrail count; omits measurement text from conditions"}
+{"id": "tsi-prm:Annex §4.2.2.11.1#2", "choice": "a", "unsure": true, "reason": "Same values; A uses shortest quotes containing each number"}
+{"id": "tsi-prm:Annex §4.4.2.12#1", "choice": "b", "unsure": true, "reason": "Same rule; B parameter excludes comparator wording"}
+{"id": "tsi-prm:Annex §Specific case Austria and Germany ‘P’ for all rolling stock intended to stop, in normal operation, at platforms below 550 mm height#1", "choice": "b", "unsure": true, "reason": "B adds low-platform scope condition"}
+{"id": "tsi-prm:Appendix G §G.2.1 Door opening signal#1", "choice": "b", "unsure": true, "reason": "A mislabels relative LN+5 dB; B includes frequencies"}
+{"id": "tsi-srt:Annex §4.2.1.5.2#1", "choice": "a", "unsure": false, "reason": "Same requirement set; A quotes shorter"}

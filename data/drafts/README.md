@@ -35,3 +35,13 @@ Consequences, all to be stated in `REPORT.md` as deviations and limitations:
   Labelling hours are zero for human time; LLM drafting cost is reported instead.
 - The 10 % audit of auto-agreed labels is not done, so the error rate of agreement is unknown.
 - Passages where the two drafters disagree still need a decision rule (not yet fixed).
+
+## Adjudication (done 2026-11-09)
+Drafter b also drafted test (Sonnet 5.5, isolated) and held-out (Sonnet 5.5, isolated); drafter a
+there is Opus 5.5. A third, independent Opus 5.5 adjudicator picked draft "a" or "b" for every
+passage where the drafts disagreed or both were unsure (`src/rail_extract/adjudicate.py`; choices
+in `data/adjudication/`). Agreed passages keep drafter a's text. Test and held-out adjudicators ran
+in isolated sessions and reported counts only; the main session never read those drafts.
+Labels carry `source`: "auto-agreed" or "adjudicated". No audit sample, no human check.
+Results: train 205 agreed / 45 adjudicated, val 41 / 9, test 57 / 13, held-out 21 / 9.
+`data/splits/FROZEN.sha256` holds the SHA-256 of the frozen test and held-out label files.

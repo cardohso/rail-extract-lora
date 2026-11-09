@@ -1,0 +1,9 @@
+{"id": "tsi-ccs:Annex I §4.2.1.1#1", "choice": "a", "unsure": true, "reason": "Both empty; both omit THR 10-9 h-1 limits"}
+{"id": "tsi-loc-pas:Annex §4.2.4.5.4#2", "choice": "b", "unsure": true, "reason": "Same values; B copies full scope and load condition"}
+{"id": "tsi-loc-pas:Annex §4.2.9.1.2.1#1", "choice": "a", "unsure": true, "reason": "A has all four clearances; B misses floor-level alternative"}
+{"id": "tsi-loc-pas:Annex §4.2.9.3.7#1", "choice": "b", "unsure": true, "reason": "Same value; B adds scope condition"}
+{"id": "tsi-loc-pas:Annex §4.2.9.3.7a. On-board derailment detection and prevention function#1", "choice": "b", "unsure": true, "reason": "Same value; B adds scope condition"}
+{"id": "tsi-loc-pas:Annex §6.2.3.20#1", "choice": "b", "unsure": true, "reason": "Test-procedure values and definitions, not design limits"}
+{"id": "tsi-loc-pas:Annex §Notes:#1", "choice": "b", "unsure": true, "reason": "Permission above 15 km/h labelled as own requirement"}
+{"id": "tsi-prm:Annex §4.2.1.8#1", "choice": "b", "unsure": true, "reason": "Same values; better copied parameters and scope on 80 cm"}
+{"id": "tsi-prm:Appendix M §M.2 CHARACTERISTICS#1", "choice": "b", "unsure": true, "reason": "Reference wheelchair data; over 8 rows anyway"}

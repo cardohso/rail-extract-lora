@@ -1,0 +1,9 @@
+{"id": "tsi-inf:Annex §4.2.4.6#1", "choice": "a", "unsure": true, "reason": "Other draft names radius parameter as location; both have minor parameter issues"}
+{"id": "tsi-inf:Annex §4.2.4.7.1#1", "choice": "a", "unsure": false, "reason": "Drafts identical; fraction range and valueless permission left out"}
+{"id": "tsi-inf:Annex §4.2.6.2.1#1", "choice": "a", "unsure": true, "reason": "Withstand implies minimum capability, so >= fits better than =="}
+{"id": "tsi-inf:Annex §6.2.4.12#1", "choice": "b", "unsure": true, "reason": "Assessment procedure naming criterion; comparator not stated, so empty"}
+{"id": "tsi-inf:Annex §P cases (11)#1", "choice": "b", "unsure": false, "reason": "Drafts identical; table over 8 rows is dropped"}
+{"id": "tsi-inf:Annex §P cases (14)#1", "choice": "a", "unsure": true, "reason": "Min and max of same parameter per row is one between"}
+{"id": "tsi-inf:Annex §P cases (59)#3", "choice": "b", "unsure": false, "reason": "Drafts identical; large table dropped"}
+{"id": "tsi-inf:Annex §P cases (59)#5", "choice": "a", "unsure": false, "reason": "Drafts identical; large table fragment dropped"}
+{"id": "tsi-inf:Appendix J#1", "choice": "a", "unsure": true, "reason": "Includes crossing angle minimum, also called a requirement in text"}
