@@ -1,0 +1,23 @@
+{"id": "tsi-ccs:Annex I §7.7.2.2#1", "choice": "b", "unsure": false, "reason": "Includes 40 km/h sanding limit and country condition"}
+{"id": "tsi-ccs:Annex I §7.7.2.6#1", "choice": "b", "unsure": true, "reason": "Adds country condition; both omit -82 dBm rule"}
+{"id": "tsi-ene:Annex §6.2.4.5#1", "choice": "a", "unsure": true, "reason": "Exemption naming numeric limit is labelled per rule 2.7"}
+{"id": "tsi-loc-pas:Annex §4.1.3#2", "choice": "a", "unsure": true, "reason": "Both empty; multiple-of-5 rule fits no comparator"}
+{"id": "tsi-loc-pas:Annex §4.2.3.2.2#1", "choice": "a", "unsure": true, "reason": "Equivalent; A quote shorter as rules require"}
+{"id": "tsi-loc-pas:Annex §4.2.4.2.1#3", "choice": "b", "unsure": false, "reason": "Adds count requirement: three control modes"}
+{"id": "tsi-loc-pas:Annex §4.2.5.3.3#1", "choice": "b", "unsure": true, "reason": "Same value; B keeps acknowledgement condition"}
+{"id": "tsi-loc-pas:Annex §4.2.6.1.2#1", "choice": "b", "unsure": true, "reason": "Snowdrift is environmental design scenario, not a limit"}
+{"id": "tsi-loc-pas:Annex §4.2.9.5#1", "choice": "a", "unsure": true, "reason": "Same values; A adds driver's cab scope condition"}
+{"id": "tsi-loc-pas:Annex §7.1.1.5.2#1", "choice": "b", "unsure": false, "reason": "Correct negative lower bound -25"}
+{"id": "tsi-loc-pas:Annex §7.1.1.6.1#6", "choice": "b", "unsure": true, "reason": "Conicity values are network characteristics for verification"}
+{"id": "tsi-loc-pas:Annex §Specific case Channel Tunnel (‘P’) (2)#1", "choice": "b", "unsure": true, "reason": "Labels duration and speed separately per rule 1.4"}
+{"id": "tsi-loc-pas:Annex §Specific case Ireland and the United Kingdom in respect of Northern Ireland (‘P’)#1", "choice": "b", "unsure": true, "reason": "Adds specific-case country condition; drops measurement text"}
+{"id": "tsi-loc-pas:Annex §Specific case Italy (‘P’)#2", "choice": "a", "unsure": false, "reason": "Both empty; headerless table fragment cannot be labelled"}
+{"id": "tsi-loc-pas:Annex §Specific case Spain (‘P’)#1", "choice": "a", "unsure": true, "reason": "Equivalent; A quote is shortest stretch"}
+{"id": "tsi-loc-pas:Appendix K §Test possibility 1#1", "choice": "b", "unsure": true, "reason": "10%/5 dimensions sentence is test applicability, not design value"}
+{"id": "tsi-prm:Annex §4.2.1.10#1", "choice": "b", "unsure": true, "reason": "Height is exact, not at least; count of locations"}
+{"id": "tsi-prm:Annex §4.2.2.1.2.1#2", "choice": "a", "unsure": true, "reason": "Labels 50 % priority seat rule as own requirement"}
+{"id": "tsi-prm:Annex §4.2.2.11.1#3", "choice": "b", "unsure": false, "reason": "Table rows pair case with limits; six requirements labelled"}
+{"id": "tsi-prm:Annex §4.4.3#2", "choice": "b", "unsure": true, "reason": "150 cm is planning assumption in operating rules list"}
+{"id": "tsi-prm:Annex §Specific case Finland ‘P’#1", "choice": "b", "unsure": false, "reason": "Table rows labelled with Finland condition"}
+{"id": "tsi-prm:Appendix G §G.3.1 Single Tone Signal#1", "choice": "a", "unsure": true, "reason": "Same values; A quotes slightly shorter"}
+{"id": "tsi-srt:Annex §4.4.6#1", "choice": "a", "unsure": true, "reason": "5 km is deemed-to-comply scope condition, not a requirement"}

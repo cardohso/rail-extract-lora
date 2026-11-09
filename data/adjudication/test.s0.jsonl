@@ -1,0 +1,13 @@
+{"id": "tsi-ccs:Annex I §7.7.2.9#1", "choice": "b", "unsure": true, "reason": "Equivalent; shorter verbatim quotes; tolerance encoding unclear in both"}
+{"id": "tsi-ene:Annex §4.2.12#1", "choice": "b", "unsure": true, "reason": "Quotes carry parameter and number; both miss 350 N limit"}
+{"id": "tsi-loc-pas:Annex §4.2.10.4.4#1", "choice": "a", "unsure": true, "reason": "Correct >= for minimum speed; B uses =="}
+{"id": "tsi-loc-pas:Annex §6.1.3.7#3", "choice": "a", "unsure": true, "reason": "Identical empty labels; test-procedure values"}
+{"id": "tsi-loc-pas:Annex §6.2.3.6#2", "choice": "b", "unsure": true, "reason": "Identical empty labels; deemed-to-comply range question"}
+{"id": "tsi-loc-pas:Annex §6.2.3.6#6", "choice": "b", "unsure": true, "reason": "Same requirement; shorter verbatim quote"}
+{"id": "tsi-loc-pas:Annex §Geometrical dimensions of wheelsets#2", "choice": "a", "unsure": true, "reason": "Includes laden and tare applicability condition; cut table"}
+{"id": "tsi-noi:Annex §4.2.1#1", "choice": "a", "unsure": true, "reason": "Includes normal vehicle conditions; column alignment assumed"}
+{"id": "tsi-noi:Annex §6.2.2.3.1#2", "choice": "b", "unsure": true, "reason": "Relative offset is not an absolute limit; A encoding invented"}
+{"id": "tsi-noi:Annex §6.2.2.3.2.1#2", "choice": "a", "unsure": true, "reason": "Identical empty labels; test speeds procedural"}
+{"id": "tsi-prm:Annex §4.2.2.7.2#1", "choice": "b", "unsure": false, "reason": "70 mm rule is complete; A misses it"}
+{"id": "tsi-prm:Annex §4.2.2.7.3#1", "choice": "b", "unsure": true, "reason": "Door placement count doubtful; leave out when unsure"}
+{"id": "tsi-prm:Annex §4.2.2.7.3#2", "choice": "b", "unsure": false, "reason": "Unit characters per second as written"}
