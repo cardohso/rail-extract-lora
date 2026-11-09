@@ -18,7 +18,8 @@ uv run ruff check . && uv run ruff format --check . && uv run pytest
 ```
 
 Tests run offline with models mocked; no GPU is needed. GPU runs use the `train` dependency
-group on a free Kaggle or Colab GPU.
+group on a free Kaggle GPU ([docs/KAGGLE.md](docs/KAGGLE.md)). The training loop's own tests need
+torch: `uv run --frozen --group train pytest tests/test_train_loop.py`.
 
 ## Run a system and score it
 

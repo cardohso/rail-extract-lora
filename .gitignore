@@ -18,3 +18,6 @@ data/raw/
 
 # Cached API responses (free-tier requests are never repeated)
 .cache/
+
+# Training runs on the free GPU (checkpoints, adapters)
+runs/
