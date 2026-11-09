@@ -1,0 +1,13 @@
+{
+ "system": "R0",
+ "split": "train",
+ "n": 250,
+ "backend": "regex",
+ "prompt": "v1",
+ "prompt_hash": "94db28aaffb2",
+ "k": 0,
+ "example_ids": [],
+ "constrained": false,
+ "thinking": false,
+ "date": "2026-11-09"
+}
