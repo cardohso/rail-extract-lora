@@ -4,6 +4,7 @@
     uv run python -m rail_extract.predict --system B2 --split val --backend hf --k 5
     uv run python -m rail_extract.predict --system B3 --split val --backend hf --k 5 --constrained
     uv run python -m rail_extract.predict --system A1 --split val --backend gemini --model <id>
+    uv run python -m rail_extract.predict --system L1-C1-s1 --split val --backend hf --adapter DIR
     uv run python -m rail_extract.predict --system R0 --split test --final
 
 Writes predictions/<system>/<split>.jsonl (one record per passage, see scoring.py) and a
@@ -36,6 +37,7 @@ def build_backend(a: argparse.Namespace) -> Backend:
             constrained=a.constrained,
             thinking=a.thinking,
             batch_size=a.batch_size,
+            adapter=a.adapter,
         )
     if a.backend == "gemini":
         return GeminiBackend(a.model or "gemini-3.5-flash-lite")
@@ -77,6 +79,7 @@ def main() -> None:
     ap.add_argument("--backend", choices=["hf", "gemini", "groq"])
     ap.add_argument("--model")
     ap.add_argument("--revision")
+    ap.add_argument("--adapter", help="directory of a trained LoRA adapter (systems L1, L2)")
     ap.add_argument("--prompt", default="v1")
     ap.add_argument("--k", type=int, default=0, help="few-shot examples from train")
     ap.add_argument("--constrained", action="store_true")
@@ -100,6 +103,7 @@ def main() -> None:
         "prompt_hash": prompts.prompt_hash(a.prompt, examples),
         "k": a.k,
         "example_ids": [e["id"] for e in examples or []],
+        "adapter": a.adapter,
         "constrained": a.constrained,
         "thinking": a.thinking,
         "date": datetime.date.today().isoformat(),

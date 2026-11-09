@@ -48,37 +48,56 @@ class HFBackend:
     def __init__(
         self,
         model: str,
-        revision: str,
+        revision: str | None,
         constrained: bool = False,
         thinking: bool = False,
-        max_new_tokens: int = 1024,
+        max_new_tokens: int = 2048,
         batch_size: int = 8,
         device: str | None = None,
+        adapter: str | None = None,
     ) -> None:
         import torch
         from transformers import AutoModelForCausalLM, AutoTokenizer
 
-        self.name = f"hf:{model}@{revision[:8]}"
+        device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+        tok = AutoTokenizer.from_pretrained(model, revision=revision)
+        net = AutoModelForCausalLM.from_pretrained(model, revision=revision, dtype=torch.bfloat16)
+        if adapter:
+            from peft import PeftModel
+
+            net = PeftModel.from_pretrained(net, adapter)
+        name = f"hf:{model}@{(revision or 'local')[:8]}" + (f"+{adapter}" if adapter else "")
+        self._setup(net.to(device), tok, name, constrained, thinking, max_new_tokens, batch_size)
+
+    @classmethod
+    def from_loaded(cls, net, tok, name: str = "hf:loaded", **options) -> HFBackend:
+        """Wrap a model already in memory (the overfit test generates right after training)."""
+        self = cls.__new__(cls)
+        defaults = {
+            "constrained": False,
+            "thinking": False,
+            "max_new_tokens": 2048,
+            "batch_size": 8,
+        }
+        self._setup(net, tok, name, **(defaults | options))
+        return self
+
+    def _setup(self, net, tok, name, constrained, thinking, max_new_tokens, batch_size) -> None:
+        import torch
+
+        self.torch, self.model, self.tok, self.name = torch, net.eval(), tok, name
+        self.device = next(net.parameters()).device
         self.constrained, self.thinking = constrained, thinking
         self.max_new_tokens, self.batch_size = max_new_tokens, batch_size
-        self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
-        self.torch = torch
-        self.tok = AutoTokenizer.from_pretrained(model, revision=revision)
-        self.tok.padding_side = "left"
-        if self.tok.pad_token is None:
-            self.tok.pad_token = self.tok.eos_token
-        self.model = (
-            AutoModelForCausalLM.from_pretrained(model, revision=revision, dtype=torch.bfloat16)
-            .to(self.device)
-            .eval()
-        )
+        tok.padding_side = "left"
+        if tok.pad_token is None:
+            tok.pad_token = tok.eos_token
         self.compiled = None
         if constrained:
             import xgrammar as xg
 
-            info = xg.TokenizerInfo.from_huggingface(
-                self.tok, vocab_size=self.model.config.vocab_size
-            )
+            vocab = net.config.vocab_size
+            info = xg.TokenizerInfo.from_huggingface(tok, vocab_size=vocab)
             self.compiled = xg.GrammarCompiler(info).compile_json_schema(
                 json.dumps(flat_json_schema())
             )
@@ -94,9 +113,12 @@ class HFBackend:
         out: dict[int, str] = {}
         for start in range(0, len(order), self.batch_size):
             idx = order[start : start + self.batch_size]
-            enc = self.tok([prompts[i] for i in idx], return_tensors="pt", padding=True).to(
-                self.device
-            )
+            enc = self.tok(
+                [prompts[i] for i in idx],
+                return_tensors="pt",
+                padding=True,
+                add_special_tokens=False,  # the chat template already wrote them
+            ).to(self.device)
             procs = None
             if self.compiled is not None:
                 from xgrammar.contrib.hf import LogitsProcessor
