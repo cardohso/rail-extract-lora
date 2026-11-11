@@ -29,6 +29,7 @@ class TrainConfig:
     epochs: int = 4
     targets: tuple[str, ...] = ATTN
     batch_size: int = 4
+    micro_batch: int = 1  # sequences per forward pass; gradients are accumulated to batch_size
     dropout: float = 0.05
     weight_decay: float = 0.0
     warmup: float = 0.1  # share of the steps with a linear ramp-up
