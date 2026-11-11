@@ -13,3 +13,10 @@ or key is needed: the base model is public.
 
 Only GPU 0 is used, so timings are for one T4. A stopped run resumes from its last checkpoint only
 if `runs/` still exists; Save & Run All starts clean, so a new version starts from step 0.
+
+## If a run fails or you interrupt it
+
+Interrupting a cell stops its command now, but a run that was already started by an older version
+of the notebook may still hold the GPU. The notebook refuses to start if the GPU is already busy.
+Fix: **Run > Restart Session**, or use **Save & Run All**, which always starts on a clean machine.
+Do not run the cells by hand twice in one session.

@@ -140,3 +140,24 @@ def test_constrained_decoding_yields_schema_valid_json(model_dir):
     for text in outs:
         if text.rstrip().endswith("}"):
             assert schema.parse_output(text) is not None
+
+
+def test_micro_batches_give_the_same_gradient_as_one_batch(model_dir, short_prompt):
+    tok, net, device, ex = fresh(model_dir)
+    # make lora_B non-zero so every LoRA weight has a real gradient
+    for k, v in net.named_parameters():
+        if "lora_B" in k:
+            torch.nn.init.normal_(v, std=0.05)
+    net.eval()  # no dropout: the two runs must see the same function
+    pad, idx = tok.pad_token_id, [0, 1, 2, 3]
+    grads, losses = {}, {}
+    for micro in (1, 2, 4):
+        net.zero_grad(set_to_none=True)
+        losses[micro] = train_lora.accumulate(net, ex, idx, micro, pad, device)
+        grads[micro] = {
+            k: v.grad.detach().clone() for k, v in net.named_parameters() if v.requires_grad
+        }
+    for micro in (1, 2):
+        assert abs(losses[micro] - losses[4]) < 1e-5
+        for k in grads[4]:
+            assert torch.allclose(grads[micro][k], grads[4][k], rtol=1e-3, atol=1e-6), (micro, k)

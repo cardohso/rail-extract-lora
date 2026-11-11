@@ -100,6 +100,29 @@ def _load_state(out: Path, net, opt) -> tuple[int, float, list[float]]:
     return state["step"], state["elapsed"], state["losses"]
 
 
+def accumulate(net, examples, idx, micro_batch, pad, device, use_amp=False) -> float:
+    """Backward pass for one batch, run in micro-batches (memory: the logits are 100k wide).
+
+    Each micro-batch loss is weighted by its share of the batch's target tokens, so the summed
+    gradient equals the gradient of the whole batch's mean token loss. Returns that loss."""
+    import torch
+
+    n_tokens = sum(sum(t != T.IGNORE for t in examples[i]["labels"]) for i in idx)
+    batch_loss = 0.0
+    for start in range(0, len(idx), micro_batch):
+        chunk = idx[start : start + micro_batch]
+        enc = {
+            k: torch.tensor(v, device=device)
+            for k, v in T.collate([examples[i] for i in chunk], pad).items()
+        }
+        share = sum(sum(t != T.IGNORE for t in examples[i]["labels"]) for i in chunk) / n_tokens
+        with torch.autocast(device_type=device, dtype=torch.bfloat16, enabled=use_amp):
+            loss = net(**enc).loss
+        (loss * share).backward()
+        batch_loss += float(loss.detach()) * share
+    return batch_loss
+
+
 def train_loop(
     cfg: T.TrainConfig,
     net,
@@ -132,15 +155,11 @@ def train_loop(
         for group in opt.param_groups:
             group["lr"] = cfg.lr * T.lr_factor(step, total, cfg.warmup)
         idx = T.batch_indices(step, len(examples), cfg.batch_size, seed)
-        batch = T.collate([examples[i] for i in idx], pad)
-        enc = {k: torch.tensor(v, device=device) for k, v in batch.items()}
-        with torch.autocast(device_type=device, dtype=torch.bfloat16, enabled=use_amp):
-            loss = net(**enc).loss
-        loss.backward()
+        batch_loss = accumulate(net, examples, idx, cfg.micro_batch, pad, device, use_amp)
         torch.nn.utils.clip_grad_norm_(params, cfg.max_grad_norm)
         opt.step()
         opt.zero_grad(set_to_none=True)
-        losses.append(float(loss.detach()))
+        losses.append(batch_loss)
         done = step + 1
         if done % 10 == 0 or done == total:
             mean = sum(losses[-10:]) / len(losses[-10:])
