@@ -55,13 +55,19 @@ class HFBackend:
         batch_size: int = 8,
         device: str | None = None,
         adapter: str | None = None,
+        precision: str = "fp16",
     ) -> None:
         import torch
         from transformers import AutoModelForCausalLM, AutoTokenizer
 
         device = device or ("cuda" if torch.cuda.is_available() else "cpu")
         tok = AutoTokenizer.from_pretrained(model, revision=revision)
-        net = AutoModelForCausalLM.from_pretrained(model, revision=revision, dtype=torch.bfloat16)
+        # fp16 on a GPU (the free T4 has no native bf16 and is several times slower with it);
+        # bf16 on the CPU. Training used the same fp16, so B and L systems share one precision.
+        gpu = {"fp16": torch.float16, "bf16": torch.bfloat16}[precision]
+        net = AutoModelForCausalLM.from_pretrained(
+            model, revision=revision, dtype=gpu if device == "cuda" else torch.bfloat16
+        )
         if adapter:
             from peft import PeftModel
 

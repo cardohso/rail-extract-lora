@@ -161,3 +161,19 @@ def test_micro_batches_give_the_same_gradient_as_one_batch(model_dir, short_prom
         assert abs(losses[micro] - losses[4]) < 1e-5
         for k in grads[4]:
             assert torch.allclose(grads[micro][k], grads[4][k], rtol=1e-3, atol=1e-6), (micro, k)
+
+
+def test_validation_scoring_writes_predictions_and_results(
+    model_dir, short_prompt, tmp_path, monkeypatch
+):
+    from rail_extract import evaluate as E
+
+    monkeypatch.setattr(train_lora, "load_split", lambda split: rows())
+    monkeypatch.setattr(E, "load_split", lambda split, final=False, root=None: rows())
+    tok, net, device, ex = fresh(model_dir)
+    train_lora.train_loop(CFG, net, tok, ex, tmp_path / "run", 1, device)
+    report = train_lora.eval_on_val(net, tok, "tiny", 1, root=tmp_path)
+    assert set(report) == {"L1-tiny-s1", "L2-tiny-s1"}
+    for system in report:
+        assert (tmp_path / "predictions" / system / "val.jsonl").exists()
+        assert (tmp_path / "results" / f"{system}.val.json").exists()
