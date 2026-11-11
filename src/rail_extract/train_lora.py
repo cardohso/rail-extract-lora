@@ -4,7 +4,8 @@
     python -m rail_extract.train_lora --config C1 --seed 1 --out runs/C1-s1
 
 A checkpoint is written every --ckpt-every steps and at the end; running the same command again
-resumes from it. A resumed run is identical to an uninterrupted one: same batches, same random
+resumes from it (with --precision fp16 the loss scale restarts, so only bf16 resumes bit-exactly).
+A resumed bf16 run is identical to an uninterrupted one: same batches, same random
 state. The overfit test comes first (PREREGISTRATION.md section 4); it trains on 8 passages and
 must reproduce them with field micro-F1 of at least 0.90 and every output schema-valid.
 """
@@ -26,14 +27,20 @@ from rail_extract.predict import BASE_MODEL, BASE_REVISION
 CKPT = "training_state.pt"
 
 
-def load_for_training(cfg: T.TrainConfig, model: str, revision: str | None, seed: int):
-    """Tokenizer and PEFT-wrapped model. LoRA weights are initialised from `seed`."""
+def load_for_training(
+    cfg: T.TrainConfig, model: str, revision: str | None, seed: int, precision: str = "bf16"
+):
+    """Tokenizer and PEFT-wrapped model. LoRA weights are initialised from `seed`.
+
+    `precision` is the base-model dtype on a GPU: "bf16" (default) or "fp16". The T4 has no
+    native bf16, so fp16 can be much faster there. LoRA weights stay in float32."""
     import torch
     from peft import LoraConfig, get_peft_model
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    dtype = torch.bfloat16 if device == "cuda" else torch.float32
+    gpu_dtype = {"bf16": torch.bfloat16, "fp16": torch.float16}[precision]
+    dtype = gpu_dtype if device == "cuda" else torch.float32
     tok = AutoTokenizer.from_pretrained(model, revision=revision)
     net = AutoModelForCausalLM.from_pretrained(model, revision=revision, dtype=dtype).to(device)
     net.config.use_cache = False
@@ -100,7 +107,9 @@ def _load_state(out: Path, net, opt) -> tuple[int, float, list[float]]:
     return state["step"], state["elapsed"], state["losses"]
 
 
-def accumulate(net, examples, idx, micro_batch, pad, device, use_amp=False) -> float:
+def accumulate(
+    net, examples, idx, micro_batch, pad, device, use_amp=False, amp_dtype=None, scaler=None
+) -> float:
     """Backward pass for one batch, run in micro-batches (memory: the logits are 100k wide).
 
     Each micro-batch loss is weighted by its share of the batch's target tokens, so the summed
@@ -116,9 +125,10 @@ def accumulate(net, examples, idx, micro_batch, pad, device, use_amp=False) -> f
             for k, v in T.collate([examples[i] for i in chunk], pad).items()
         }
         share = sum(sum(t != T.IGNORE for t in examples[i]["labels"]) for i in chunk) / n_tokens
-        with torch.autocast(device_type=device, dtype=torch.bfloat16, enabled=use_amp):
+        with torch.autocast(device_type=device, dtype=amp_dtype or torch.bfloat16, enabled=use_amp):
             loss = net(**enc).loss
-        (loss * share).backward()
+        scaled = loss * share
+        (scaler.scale(scaled) if scaler else scaled).backward()
         batch_loss += float(loss.detach()) * share
     return batch_loss
 
@@ -133,6 +143,7 @@ def train_loop(
     device: str,
     ckpt_every: int = 50,
     stop_after: int | None = None,
+    precision: str = "bf16",
 ) -> dict:
     """Train; `stop_after` ends early after that step, as a crash would (used by the tests)."""
     import torch
@@ -150,14 +161,25 @@ def train_loop(
     net.train()
     t0 = time.monotonic()
     use_amp = device == "cuda"
+    amp_dtype = torch.float16 if precision == "fp16" else torch.bfloat16
+    # fp16 needs loss scaling so small gradients do not underflow; bf16 does not
+    scaler = torch.amp.GradScaler("cuda") if use_amp and precision == "fp16" else None
     pad = tok.pad_token_id if tok.pad_token_id is not None else tok.eos_token_id
     for step in range(start, total):
         for group in opt.param_groups:
             group["lr"] = cfg.lr * T.lr_factor(step, total, cfg.warmup)
         idx = T.batch_indices(step, len(examples), cfg.batch_size, seed)
-        batch_loss = accumulate(net, examples, idx, cfg.micro_batch, pad, device, use_amp)
+        batch_loss = accumulate(
+            net, examples, idx, cfg.micro_batch, pad, device, use_amp, amp_dtype, scaler
+        )
+        if scaler:
+            scaler.unscale_(opt)
         torch.nn.utils.clip_grad_norm_(params, cfg.max_grad_norm)
-        opt.step()
+        if scaler:
+            scaler.step(opt)
+            scaler.update()
+        else:
+            opt.step()
         opt.zero_grad(set_to_none=True)
         losses.append(batch_loss)
         done = step + 1
@@ -168,9 +190,12 @@ def train_loop(
             _save_state(out, net, opt, done, elapsed + time.monotonic() - t0, losses)
         if done == stop_after:
             break
+    ran = len(losses) - start
     return {
         "steps": total,
+        "precision": precision,
         "train_seconds": round(elapsed + time.monotonic() - t0, 1),
+        "seconds_per_step": round((time.monotonic() - t0) / max(1, ran), 2),
         "final_loss": sum(losses[-10:]) / max(1, len(losses[-10:])),
         "losses": [round(x, 5) for x in losses],
         "peak_gpu_gb": round(torch.cuda.max_memory_allocated() / 1e9, 2) if use_amp else None,
@@ -215,6 +240,8 @@ def main() -> None:
     ap.add_argument("--model", default=BASE_MODEL)
     ap.add_argument("--revision", default=BASE_REVISION)
     ap.add_argument("--ckpt-every", type=int, default=50)
+    ap.add_argument("--precision", choices=["bf16", "fp16"], default="bf16")
+    ap.add_argument("--stop-after", type=int, help="stop after this many steps (speed tests)")
     a = ap.parse_args()
     if a.overfit == bool(a.config):
         raise SystemExit("give exactly one of --overfit and --config")
@@ -223,12 +250,14 @@ def main() -> None:
     rows = load_split("train")
     if a.overfit:
         rows = T.overfit_rows(rows)
-    tok, net, device = load_for_training(cfg, a.model, a.revision, a.seed)
+    tok, net, device = load_for_training(cfg, a.model, a.revision, a.seed, a.precision)
     examples, dropped = encode(rows, tok)
     trainable, total = net.get_nb_trainable_parameters()
     print(f"{len(examples)} examples, {len(dropped)} dropped, device {device}", flush=True)
     print(f"trainable parameters {trainable:,} of {total:,}", flush=True)
-    log = train_loop(cfg, net, tok, examples, a.out, a.seed, device, a.ckpt_every)
+    log = train_loop(
+        cfg, net, tok, examples, a.out, a.seed, device, a.ckpt_every, a.stop_after, a.precision
+    )
     log |= {
         "config": cfg.to_dict(),
         "seed": a.seed,
