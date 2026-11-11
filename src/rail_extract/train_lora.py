@@ -231,6 +231,52 @@ def run_overfit(net, tok, rows: list[dict], out: Path, max_new_tokens: int = 204
     return {"f1": summary["f1"], "schema_valid": summary["schema_valid"], "summary": summary}
 
 
+def eval_on_val(net, tok, cfg_name: str, seed: int, root: Path | None = None) -> dict:
+    """Generate on the validation split, unconstrained (L1) and schema-constrained (L2), and score.
+
+    Writes predictions/<system>/val.jsonl and results/<system>.val.json like predict.py and
+    evaluate.py do, so the later analysis reads them the same way. Validation only."""
+    import datetime
+
+    from rail_extract import labels as L
+    from rail_extract.backends import HFBackend
+    from rail_extract.evaluate import evaluate, format_summary
+    from rail_extract.predict import predict, save
+
+    root = root or L.ROOT
+    net.gradient_checkpointing_disable()
+    net.config.use_cache = True
+    rows = load_split("val")
+    report = {}
+    for tag, constrained in (("L1", False), ("L2", True)):
+        system = f"{tag}-{cfg_name}-s{seed}"
+        backend = HFBackend.from_loaded(net, tok, system, constrained=constrained, batch_size=4)
+        t0 = time.monotonic()
+        records = predict(system, rows, backend, "v1", None)
+        seconds = round(time.monotonic() - t0, 1)
+        meta = {
+            "system": system,
+            "split": "val",
+            "n": len(records),
+            "backend": system,
+            "prompt": "v1",
+            "k": 0,
+            "constrained": constrained,
+            "thinking": False,
+            "precision": "fp16",
+            "generation_seconds": seconds,
+            "date": datetime.date.today().isoformat(),
+        }
+        save(system, "val", records, meta, root)
+        result = evaluate(system, "val", root=root)
+        out = root / "results" / f"{system}.val.json"
+        out.parent.mkdir(exist_ok=True)
+        out.write_text(json.dumps(result, indent=1, ensure_ascii=False))
+        print(format_summary(result), f"\n  generation {seconds} s", flush=True)
+        report[system] = result["summary"]["f1"]
+    return report
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--config", choices=list(T.CONFIGS))
@@ -241,6 +287,7 @@ def main() -> None:
     ap.add_argument("--revision", default=BASE_REVISION)
     ap.add_argument("--ckpt-every", type=int, default=50)
     ap.add_argument("--precision", choices=["bf16", "fp16"], default="bf16")
+    ap.add_argument("--val", action="store_true", help="after training, score on validation")
     ap.add_argument("--stop-after", type=int, help="stop after this many steps (speed tests)")
     a = ap.parse_args()
     if a.overfit == bool(a.config):
@@ -278,6 +325,8 @@ def main() -> None:
             f"field F1 {result['f1']:.3f}, schema-valid {result['schema_valid']:.0%}",
             flush=True,
         )
+    if a.val and not a.overfit:
+        log["val_f1"] = eval_on_val(net, tok, cfg.name, a.seed)
     (a.out / "train_log.json").write_text(json.dumps(log, indent=1))
     print(
         f"done in {log['train_seconds']} s; adapter {log['adapter_bytes'] / 1e6:.1f} MB", flush=True

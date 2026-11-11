@@ -38,6 +38,7 @@ def build_backend(a: argparse.Namespace) -> Backend:
             thinking=a.thinking,
             batch_size=a.batch_size,
             adapter=a.adapter,
+            precision=a.precision,
         )
     if a.backend == "gemini":
         return GeminiBackend(a.model or "gemini-3.5-flash-lite")
@@ -84,6 +85,7 @@ def main() -> None:
     ap.add_argument("--k", type=int, default=0, help="few-shot examples from train")
     ap.add_argument("--constrained", action="store_true")
     ap.add_argument("--thinking", action="store_true")
+    ap.add_argument("--precision", choices=["fp16", "bf16"], default="fp16")
     ap.add_argument("--batch-size", type=int, default=8)
     ap.add_argument("--limit", type=int, help="first N passages only (smoke runs)")
     a = ap.parse_args()
@@ -106,6 +108,7 @@ def main() -> None:
         "adapter": a.adapter,
         "constrained": a.constrained,
         "thinking": a.thinking,
+        "precision": a.precision,
         "date": datetime.date.today().isoformat(),
     }
     path = save(a.system, a.split, records, meta)
