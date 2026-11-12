@@ -1,0 +1,13 @@
+{
+ "system": "L1-C7-s1",
+ "split": "val",
+ "n": 50,
+ "backend": "L1-C7-s1",
+ "prompt": "v1",
+ "k": 0,
+ "constrained": false,
+ "thinking": false,
+ "precision": "fp16",
+ "generation_seconds": 317.3,
+ "date": "2026-11-12"
+}
